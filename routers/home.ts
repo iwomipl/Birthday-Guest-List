@@ -2,6 +2,7 @@ import { Router } from "express";
 import {GuestRecord} from "../records/guest.record";
 import { ValidationError } from "../utils/errors";
 import {cookieName, dateOfBirthday} from "../utils/variables";
+import {createFileWithBirthdayData} from "../utils/functions";
 
 export const homeRouter = Router();
 
@@ -11,6 +12,23 @@ homeRouter
         //, gdy gość wpisze dane innego gościa, to zaloguje się na jego miejsce i u niego pojawi się opcja zmiany
         // ciasteczko się nadpisuje
         res.render('add/guest');
+    })
+    .get('/download-guest-list', async (req, res)=>{
+        //@TODO usunąć plik po pobraniu
+        const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
+        if (idFromCookie) {
+            const path = await createFileWithBirthdayData(idFromCookie);
+
+            res.sendFile(path, (err) => {
+                if (err){
+                 console.error(err);
+                } else {
+
+                }
+            });
+        } else {
+            throw new ValidationError('Zaloguj się zanim spróbujesz pobrać listę gości');
+        }
 })
     .get('/', async (req, res)=>{
         const fullList = await GuestRecord.listAll();
