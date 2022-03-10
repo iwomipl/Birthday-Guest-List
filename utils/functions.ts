@@ -75,7 +75,6 @@ async function createTableOfGuests(listOfGuests: GuestRecord[]){
 }
 
 export async function getDataToRenderList(id: string, sentMessage?: string){
-    console.log(id)
     const idFromCookie: string | null = id ? id : null;
     const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
     const resignationTimeStampString = await dateToString(dateOfBirthday);
