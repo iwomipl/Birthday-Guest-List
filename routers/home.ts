@@ -2,20 +2,16 @@ import { Router } from "express";
 import {GuestRecord} from "../records/guest.record";
 import { ValidationError } from "../utils/errors";
 import {cookieName, dateOfBirthday} from "../utils/variables";
-import {createFileWithBirthdayData, dateToString} from "../utils/functions";
+import {createFileWithBirthdayData, getDataToRenderList} from "../utils/functions";
 import {unlink} from "fs/promises";
 
 export const homeRouter = Router();
 
 homeRouter
     .get('/add-guest', async (req, res)=>{
-        //Tutaj wypadałby zrobić walidację, czy gość nie jest już na liście gości (nie ma ciasteczka)- jednak
-        //, gdy gość wpisze dane innego gościa, to zaloguje się na jego miejsce i u niego pojawi się opcja zmiany
-        // ciasteczko się nadpisuje
         res.render('add/guest');
     })
     .get('/download-guest-list', async (req, res)=>{
-        //@TODO usunąć plik po pobraniu
         const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
         if (idFromCookie) {
             const path = await createFileWithBirthdayData(idFromCookie);
@@ -33,23 +29,6 @@ homeRouter
             throw new ValidationError('Zaloguj się zanim spróbujesz pobrać listę gości');
         }
 })
-    .get('/', async (req, res)=>{
-        const fullList = await GuestRecord.listAll();
-        const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
-        const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
-        const resignationTimeStampString = await dateToString(dateOfBirthday);
-
-        if (fullList.length === 0){
-            res.redirect('/add-guest');
-            return;
-        }
-
-        res.render('home/home', {
-            fullList,
-            loggedUser,
-            resignationTimeStampString,
-        });
-    })
     .get('/my-choice', async (req, res)=>{
         const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
         if (!idFromCookie){
@@ -63,12 +42,27 @@ homeRouter
             loggedUser,
         });
     })
+    .get('/', async (req, res)=>{
+        const fullList = await GuestRecord.listAll();
+        const { loggedUser, resignationTimeStampString } = await getDataToRenderList(req.cookies.guestOnBirthday);
+        // const idFromCookie: string | null = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
+        // const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
+        // const resignationTimeStampString = await dateToString(dateOfBirthday);
+
+        if (fullList.length === 0){
+            res.redirect('/add-guest');
+            return;
+        }
+
+        res.render('home/home', {
+            fullList,
+            loggedUser,
+            resignationTimeStampString,
+        });
+    })
     .get('/absent', async (req, res)=>{
         const fullList = await GuestRecord.listAllAbsent();
-        const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
-        const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
-        const message= ', którzy nie przyjdą.';
-        const resignationTimeStampString = await dateToString(dateOfBirthday);
+        const { loggedUser, resignationTimeStampString, message } = await getDataToRenderList(req.cookies.guestOnBirthday, ', którzy nie przyjdą.');
 
         if (fullList.length === 0){
             throw new ValidationError('Niestety, nikogo nie ma na liście gości nieobecnych');
@@ -86,10 +80,7 @@ homeRouter
         if (fullList.length === 0){
             throw new ValidationError('Niestety, nikogo nie ma na liście gości, którzy chcą przyjść.');
         }
-
-        const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
-        const message = ', którzy przyjdą.';
-        const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
+        const { loggedUser, message } = await getDataToRenderList(req.cookies.guestOnBirthday, ', którzy przyjdą.');
 
         res.render('home/home', {
             fullList,
@@ -99,14 +90,11 @@ homeRouter
     })
     .get('/resigned', async (req, res)=>{
         const fullList = await GuestRecord.listAllThatResigned();
-        const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
-        const message = ', którzy zrezygnowali.';
-
         if (fullList.length === 0){
             throw new ValidationError('Niestety, nikogo nie ma na liście, gości, którzy zrezygnowali.');
         }
-        const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
-        const resignationTimeStampString = await dateToString(dateOfBirthday);
+        const { loggedUser, message, resignationTimeStampString } = await getDataToRenderList(req.cookies.guestOnBirthday, ', którzy zrezygnowali.');
+
 
         res.render('home/home', {
             fullList,
