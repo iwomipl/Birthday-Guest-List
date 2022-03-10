@@ -11,3 +11,19 @@ export const handleError =(err: Error, req: Request, res: Response, next: NextFu
             message: err instanceof ValidationError ? err.message : 'Przepraszamy, spróbuj ponownie.',
         });
 }
+
+export const handleFourOhFourError = (req: Request, res: Response, next: NextFunction): void => {
+    res.status(404);
+
+    if (req.accepts('html')) {
+        res.render('error', {
+            message: 'Taka strona nie istnieje.',
+        });
+        return;
+    }
+
+    if (req.accepts('json')) {
+        res.json({ error: 'Not found' });
+        return;
+    }
+}

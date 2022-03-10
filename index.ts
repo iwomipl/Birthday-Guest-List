@@ -5,7 +5,7 @@ import * as cookieParser from 'cookie-parser';
 import {static as eStatic, urlencoded} from "express";
 import {engine} from "express-handlebars";
 import { homeRouter } from './routers/home';
-import { handleError } from './utils/errors';
+import {handleError, handleFourOhFourError} from './utils/errors';
 import {handlebarsHelpers} from "./utils/handlebars-helpers";
 
 const app = express();
@@ -25,6 +25,7 @@ app.set('view engine', '.hbs');
 app.use('/', homeRouter);
 
 app.use(handleError);
+app.use(handleFourOhFourError);
 
 app.listen(3000, 'localhost', ()=>{
     console.log('listening on http://localhost:3000');
