@@ -2,7 +2,7 @@ import {ValidationError} from "../utils/errors";
 import {v4 as uuid} from 'uuid';
 import {pool} from "../utils/db";
 import {FieldPacket} from "mysql2";
-import {dateOfBirthday} from "../utils/variables";
+import {validateTimeOfResigning} from "../utils/functions";
 
 type GuestRecordResults = [GuestRecord[], FieldPacket[]];
 
@@ -14,7 +14,7 @@ export class GuestRecord {
     public startTime?: Date;
     public resignedAt?: Date;
 
-    constructor(obj: Omit<GuestRecord, 'insert' | 'setAbsentPresent' | 'delete' | 'validateTimeOfResigning' | 'findByNameAndLastName'>) {
+    constructor(obj: Omit<GuestRecord, 'insert' | 'setAbsentPresent' | 'delete' | 'findByNameAndLastName'>) {
         const {id, name, lastName, startTime, resignedAt, willCome} = obj;
         if(name.length <3 || name.length >50){
             throw new ValidationError(`Imię musi posiadać od 3 do 50 znaków. Aktualnie jest to ${name.length}.`);
@@ -28,11 +28,6 @@ export class GuestRecord {
         this.startTime = startTime;
         this.resignedAt = resignedAt;
         this.willCome = willCome;
-    }
-
-    validateTimeOfResigning(){
-        const timeBeforeBirthdayToResign = (60 * 60 * 5);
-        return (dateOfBirthday.getTime() - new Date().getTime() >= timeBeforeBirthdayToResign);
     }
 
     async insert(): Promise<string>{
@@ -58,12 +53,16 @@ export class GuestRecord {
 
     async setAbsentPresent(): Promise<void> {
         const {willCome} = await GuestRecord.getOne(this.id); //@TODO dodać walidację czasu zmiany
-
-        await pool.execute('UPDATE `guests` SET `willCome` = :willCome, `resignedAt` = :resignedAt WHERE `id` = :id', {
-            willCome: willCome ? 0 : 1,
-            resignedAt: willCome ? new Date() : null,
-            id: this.id,
-        })
+        console.log(validateTimeOfResigning());
+        if (validateTimeOfResigning()){
+            await pool.execute('UPDATE `guests` SET `willCome` = :willCome, `resignedAt` = :resignedAt WHERE `id` = :id', {
+                willCome: willCome ? 0 : 1,
+                resignedAt: willCome ? new Date() : null,
+                id: this.id,
+            })
+        } else {
+            throw new ValidationError('Niestety jest już za późno, nie można zmienić decyzji o przyjściu później, niż 5 godzin przed rozpoczęciem imprezy.');
+        }
     }
 
     static async findByNameAndLastName(sentName: string, sentLastName: string): Promise<string | null>{

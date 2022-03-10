@@ -44,7 +44,7 @@ homeRouter
         const fullList = await GuestRecord.listAllAbsent();
         const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
         const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
-        const message= ' nieobecnych';
+        const message= ', którzy nie przyjdą.';
 
         if (fullList.length === 0){
             throw new ValidationError('Niestety, nikogo nie ma na liście gości nieobecnych');
@@ -63,7 +63,7 @@ homeRouter
         }
 
         const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
-        const message = ' obecnych';
+        const message = ', którzy przyjdą.';
         const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
 
         res.render('home/home', {
@@ -75,7 +75,7 @@ homeRouter
     .get('/resigned', async (req, res)=>{
         const fullList = await GuestRecord.listAllThatResigned();
         const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
-        const message = ', którzy zrezygnowali';
+        const message = ', którzy zrezygnowali.';
 
         if (fullList.length === 0){
             throw new ValidationError('Niestety, nikogo nie ma na liście, gości, którzy zrezygnowali.');
