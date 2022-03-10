@@ -41,16 +41,16 @@ Obecność potwierdzona - niebieski pasek z imieniem, nazwiskiem i napisem "Obec
 Obecnośc potwierdzona, ale wycofana - czerwony pasek z imieniem, nazwiskiem i napisem "Czas zgłoszenia nieobecności" "data i godzina"
 Obecność niepotwierdzona - czerwony pasek z imieniem, nazwiskiem i napisem bez dopisku.
 
-Decyzje projektowe:
+DECYZJE PROJEKTOWE:
 - DB - MariaDb, mimo, że wolniejsza niż PostgreSQL, to wystarczająca do małego projektu. 
-- API Rest
+- API Rest.
 - ExpressHandleBars z ućzyciem helperów - niby wygląd nie ma wielkiego znaczenia, ale handlebarsy bardzo to ułatwiają.
 - Funkcje asynchroniczne - starałem się unikać zajmowania Call Stacka, funkcje, które mogłem zrobić asynchroniczne takie są.
-- Wzorzec projektowy Active Record
-- zmienną dateOfBirthday umieściłem w (ponoć) formacie ułatwiającym jego obsługę przez baz danych,
-- Staralem się w projekcie jak najczęściej korzystać za bazy danych, jest szybsza w wyszukiwaniu informacji, a funkcje asynchroniczne pozwalają serwerowi zająć się następnym zadaniem w Call Stacku.
+- Wzorzec projektowy Active Record.
+- Zmienną dateOfBirthday umieściłem w (ponoć) formacie ułatwiającym jego obsługę przez baz danych "YYYY-MM-DD HH:MM:SS".
+- Staralem się w projekcie jak najczęściej korzystać za bazy danych, jest szybsza w wyszukiwaniu informacji, a funkcje asynchroniczne pozwalają serwerowi zająć się następnym zadaniem w Call Stacku. Mógłbym więc np. funkcje pobierające listy użytkowników zagregować w jedną funkcję i później mapować, przez wyniki poszukując właściwych rozwiązań, jednak moja intencja była taka, by używać Bazy Danych do filtrowania.   
 - Po wysłaniu wygenerowanego pliku z listą gości, kasuję go z folderu.
-- 
+- Tworząc zapytania do bazy danych używałem składni utrudniającej wstrzyknięcie kodu do bazy danych za pomocą zmiennych przekazywanych w obiekcie opcji.
 
 
 

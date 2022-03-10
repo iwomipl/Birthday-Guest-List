@@ -9,6 +9,9 @@ import {handleError, handleFourOhFourError} from './utils/errors';
 import {handlebarsHelpers} from "./utils/handlebars-helpers";
 
 const app = express();
+const port = Number(process.env.PORT) || 3000;
+const host = 'localhost';
+
 
 app.use(methodOverride('_method'));
 app.use(urlencoded({
@@ -25,8 +28,9 @@ app.set('view engine', '.hbs');
 app.use('/', homeRouter);
 
 app.use(handleError);
+//błąd do obsługi 404
 app.use(handleFourOhFourError);
 
-app.listen(3000, 'localhost', ()=>{
-    console.log('listening on http://localhost:3000');
+app.listen(port, host, ()=>{
+    console.log(`listening on http://${host}:${port}`);
 });

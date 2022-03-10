@@ -29,7 +29,7 @@ export class GuestRecord {
         this.resignedAt = resignedAt;
         this.willCome = willCome;
     }
-
+    //dodanie nowego rekordu
     async insert(): Promise<string>{
        await pool.execute("INSERT INTO `guests`(`id`, `name`, `lastName`,`startTime`, `willCome`) VALUES (:id, :name, :lastName, :startTime, :willCome)", {
            id: this.id,
@@ -41,6 +41,7 @@ export class GuestRecord {
         return this.id;
     }
 
+    // Usunięcie rekordu z bazy danych
     async delete(): Promise<void>{
         if (!this.id) {
             throw new ValidationError('Niestety nie udało się usunąć gościa.');
@@ -50,12 +51,16 @@ export class GuestRecord {
         });
     }
 
+    //ustawienie obecności gościa
     async setAbsentPresent(): Promise<void> {
         const {willCome} = await GuestRecord.getOne(this.id);
 
+        //sprawdzenie czy, akcja odbywa się 5 godzin przed czasem urodzin
         if (await validateTimeOfResigning()){
             await pool.execute('UPDATE `guests` SET `willCome` = :willCome, `resignedAt` = :resignedAt WHERE `id` = :id', {
+                //zmiana statusu odwiedzin
                 willCome: willCome ? 0 : 1,
+                //ewentualne zapisanie daty zmiany odwiedzin
                 resignedAt: willCome ? new Date() : null,
                 id: this.id,
             })
@@ -64,6 +69,7 @@ export class GuestRecord {
         }
     }
 
+    //wyszukanie gościa po imieniu i nazwisku
     static async findByNameAndLastName(sentName: string, sentLastName: string): Promise<string | null>{
         const results = await GuestRecord.listAll();
         const trimmedNames = sentName.trim()+sentLastName.trim();
@@ -75,6 +81,7 @@ export class GuestRecord {
         return Boolean(guestFoundByName) ? guestFoundByName.id : null;
     }
 
+    //Pobranie jednego rekordu
     static async getOne(id: string): Promise<GuestRecord | null>{
        const [results] = await pool.execute('SELECT * FROM `guests` WHERE `id`=:id',{
             id,
@@ -83,27 +90,32 @@ export class GuestRecord {
        return results.length === 0 ? null : results[0];
     }
 
+    //Pobranie wszystkich rekordów
     static async listAll(): Promise<GuestRecord[] | null>{
         const [results] = await pool.execute('SELECT * FROM `guests` ORDER BY `startTime` DESC') as GuestRecordResults;
 
         return results.map(obj => new GuestRecord(obj));
     }
 
+    //Pobranie listy rekordów osób, które nie będą obecne
     static async listAllAbsent(): Promise<GuestRecord[] | null>{
         const [results] = await pool.execute('SELECT * FROM `guests` WHERE `willCome`= 0 ORDER BY `startTime` DESC') as GuestRecordResults;
         return results.map(obj => new GuestRecord(obj));
     }
 
+    //Pobranie listy rekordów wszystkich obecnych
     static async listAllPresent(): Promise<GuestRecord[] | null>{
         const [results] = await pool.execute('SELECT * FROM `guests` WHERE `willCome`= 1 ORDER BY `startTime` DESC') as GuestRecordResults;
         return results.map(obj => new GuestRecord(obj));
     }
 
+    //Pobranie listy rekordów wszystkich, którzy mieli być obecni, ale zrezygnowali
     static async listAllThatResigned(): Promise<GuestRecord[] | null>{
         const [results] = await pool.execute('SELECT * FROM `guests` WHERE `resignedAt` IS NOT NULL AND `willCome`= 0 ORDER BY `startTime` DESC') as GuestRecordResults;
         return results.map(obj => new GuestRecord(obj));
     }
 
+    //Sprawdzenie, czy dane logowania znajdują się w bazie
     static async isNameTaken(sentName: string, sentLastName: string): Promise<boolean>{
         const results = await GuestRecord.listAll();
         const trimmedNames = sentName.trim()+sentLastName.trim();
