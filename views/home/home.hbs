@@ -1,30 +1,21 @@
 <hr>
-{{#if message}} <h4>{{message}}</h4>{{/if}}
-<h1>Lista Gości:</h1>
+<h1>{{loggedUser.name}} {{loggedUser.lastName}}</br> Oto lista gości{{#if message}}{{message}}{{/if}}:</h1>
 <div class="wrapper">
     <div class="grid-container">
         {{#each fullList}}
             {{#if (isAbsent this.willCome)}}
-            <div class="divs absent">
-            {{else}}
             <div class="divs">
+            {{else}}
+            <div class="divs absent">
             {{/if}}
-            <div class="p-in-div"><p><strong>{{this.name}}</strong> <strong>{{this.lastName}}</strong></p></div><div class="right-span"><p>{{#if (isAbsent this.willCome)}}{{else}} Czas zgłoszenia nieobecności <strong>{{showTime this.startTime}}</strong>
-        {{/if}}</p></div>
-        {{#if (isId this.id ../idFromCookie)}}
-                {{#if (isAbsent this.willCome)}}
-                    <form method="POST" action="/{{this.id}}?_method=PATCH" >
-                        <button type="submit" name="isPresent" value="absent">Nie będę</button>
-                    </form>
-                {{else}}
-                    <form method="POST" action="/{{this.id}}?_method=PATCH" >
-                        <button type="submit" name="isPresent" value="present">Będę</button>
-                    </form>
+                <div class="p-in-div"><p><strong>{{this.name}}</strong> <strong>{{this.lastName}}</strong></p></div><div class="right-span"><p>
+            {{#if (isAbsent this.willCome)}}
+                Obecność potwierdzona
+            {{else}}
+                {{#if (isResignedAt this.resignedAt)}}
+                    Czas zgłoszenia nieobecności <strong>{{showTime this.resignedAt}}</strong>
                 {{/if}}
-                <form method="POST" action="/{{this.id}}?_method=DELETE" >
-                    <button type="submit" name="deleteOpened" value="{{this.id}}">Usuń</button>
-                </form>
-        {{/if}}
+            {{/if}}</p></div>
         </div>
         {{/each}}
     </div>

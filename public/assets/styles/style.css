@@ -1,0 +1,124 @@
+body{
+    margin: 0;
+    text-align: center;
+    top: 0;
+}
+main{
+    position: relative;
+    margin: auto;
+    text-align: center;
+    min-height: 100vh;
+}
+#top-nav{
+    margin: auto;
+    width: 80vw;
+    text-align: center;
+    opacity: 0.8;
+    border-radius: 5vh;
+}
+form {
+    padding: 1em;
+    line-height: 2em;
+    margin: auto 0 auto auto;
+}
+input{
+    height: 5vh;
+    width: 25vw;
+    margin-left: 3em;
+    padding-right: 10vw;
+    padding-left: 2vw;
+    border-radius: 5vh;
+    font-size: 2vh;
+}
+button{
+    height: 5vh;
+    margin-left: 2vw;
+    background-color: #5a5656;
+    opacity: 0.9;
+    color: aliceblue;
+    font-size: 2vh;
+    text-shadow: 0 0 1vh black;
+    border-radius: 5vh;
+    box-shadow: 0 0 1vh black;
+    cursor: pointer;
+    transition: opacity 0.5s;
+    padding-right: 1vw;
+    padding-left: 1vw;
+}
+button:hover{
+    box-shadow: 0 0 1vh white;
+    opacity: 1;
+}
+.divs{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5vh;
+    box-shadow: 0 0 1vh black;
+    background-color: blue;
+    opacity: 0.7;
+    margin: 2vh;
+}
+.absent{
+    background-color: #b93030;
+    opacity: 1;
+}
+.divs:hover{
+    box-shadow: 0 0 3vh black;
+    text-shadow: 0 0 1vh black;;
+}
+.grid-container{
+    margin-top: 2vh;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 3vh;
+    color: aliceblue;
+    justify-content: center;
+}
+::placeholder{
+    font-size: 2vh;
+}
+.divs p{
+    position: relative;
+    width: 100%;
+    text-align: left;
+    padding-left: 20px;
+}
+.divs > p > strong{
+    position: relative;
+    width: 70%;
+}
+.divs form{
+    display: flex;
+}
+.wrapper {
+    padding-bottom: 2.5rem;
+}
+h1 {
+    margin: 0;
+}
+.p-in-div {
+    width: 55vw;
+}
+.right-span{
+    width: 20vw;
+    right: 0;
+}
+nav{
+    margin: 10px;
+    padding: 20px;
+}
+nav a{
+    width: 100px;
+    background-color: crimson;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 100px;
+    padding: 20px;
+    color: aliceblue;
+    border-radius: 5vh;
+    box-shadow: 0 0 1vh black;
+    cursor: pointer;
+    transition: opacity 0.5s;
+    padding-right: 1vw;
+    padding-left: 1vw;
+}

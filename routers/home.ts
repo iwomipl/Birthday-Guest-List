@@ -3,23 +3,19 @@ import {GuestRecord} from "../records/guest.record";
 import { ValidationError } from "../utils/errors";
 import {cookieName, dateOfBirthday} from "../utils/variables";
 
-let message: string;
-
 export const homeRouter = Router();
 
 homeRouter
     .get('/add-guest', async (req, res)=>{
-        // if (req.cookies.guestOnBirthday > 0){
-        //     res.render('add/guest');
-        // } else {
-        //     throw new ValidationError('Przepraszamy nie można dodać więcej, niż jednego gościa.');
-        // }
+        //Tutaj wypadałby zrobić walidację, czy gość nie jest już na liście gości (nie ma ciasteczka)- jednak
+        //, gdy gość wpisze dane innego gościa, to zaloguje się na jego miejsce i u niego pojawi się opcja zmiany
+        // ciasteczko się nadpisuje
         res.render('add/guest');
 })
     .get('/', async (req, res)=>{
         const fullList = await GuestRecord.listAll();
         const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
-        message = message ?? null;
+        const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
 
         if (fullList.length === 0){
             res.redirect('/add-guest');
@@ -28,48 +24,122 @@ homeRouter
 
         res.render('home/home', {
             fullList,
-            idFromCookie,
+            loggedUser,
+        });
+    })
+    .get('/my-choice', async (req, res)=>{
+        const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
+        if (!idFromCookie){
+            throw new ValidationError('Niestety nie jesteś zalogowany jako gośc. Dodaj siebie klikając przycisk "Dodaj Gościa" w menu górnym.');
+        }
+        const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
+        const visitingGuest = await GuestRecord.getOne(idFromCookie);
+
+        res.render('change/choice', {
+            visitingGuest,
+            loggedUser,
+        });
+    })
+    .get('/absent', async (req, res)=>{
+        const fullList = await GuestRecord.listAllAbsent();
+        const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
+        const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
+        const message= ' nieobecnych';
+
+        if (fullList.length === 0){
+            throw new ValidationError('Niestety, nikogo nie ma na liście gości nieobecnych');
+        }
+
+        res.render('home/home', {
+            fullList,
+            message,
+            loggedUser,
+        });
+    })
+    .get('/present', async (req, res)=>{
+        const fullList = await GuestRecord.listAllPresent();
+        if (fullList.length === 0){
+            throw new ValidationError('Niestety, nikogo nie ma na liście gości, którzy chcą przyjść.');
+        }
+
+        const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
+        const message = ' obecnych';
+        const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
+
+        res.render('home/home', {
+            fullList,
+            loggedUser,
+            message,
+        });
+    })
+    .get('/resigned', async (req, res)=>{
+        const fullList = await GuestRecord.listAllThatResigned();
+        const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
+        const message = ', którzy zrezygnowali';
+
+        if (fullList.length === 0){
+            throw new ValidationError('Niestety, nikogo nie ma na liście, gości, którzy zrezygnowali.');
+        }
+        const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
+
+        res.render('home/home', {
+            fullList,
+            loggedUser,
             message,
         });
     })
     .post('/', async (req, res)=>{
         const name: string = req.body.name;
         const lastName: string = req.body.lastName;
-        if (await GuestRecord.isNameTaken(name, lastName)) {
-            throw new ValidationError(`Nie możemy cię dodać do listy gości. Gość o takim imieniu i nazwisku już istnieje. Jakie są na to szanse, żeby na imprezie urodzinowej pojawiły się dwie osoby o takich samych imionach i nazwiskach? :)`);
+        const foundByName = await GuestRecord.findByNameAndLastName(name, lastName) ?? null;
+
+        if (foundByName) {
+            const {id} = await GuestRecord.getOne(foundByName);
+
+            if (id) {
+                res
+                    .cookie(cookieName, id, {
+                        expires: dateOfBirthday,
+                        httpOnly: true,
+                        secure: true,
+                    })
+                    .redirect('/');
+            } else {
+                throw new ValidationError('Coś poszło nie tak, spróbuj ponownie.')
+            }
+        } else {
+
+            const newGuest = new GuestRecord({
+                name: name,
+                lastName: lastName,
+                willCome: 0,
+            });
+
+            const id = await newGuest.insert();
+
+            res
+                .cookie(cookieName, id, {
+                    expires: dateOfBirthday,
+                    httpOnly: true,
+                    secure: true,
+                })
+                .redirect('/');
         }
-
-        const newGuest = new GuestRecord({
-            name: name,
-            lastName: lastName,
-            willCome: 0,
-        });
-
-        const id = await newGuest.insert();
-
-        res
-            .cookie(cookieName, id, {
-                expires: dateOfBirthday,
-                httpOnly: true,
-                secure: true,
-            })
-            .redirect('/');
     })
-    .patch('/:id', async (req, res)=>{
-        const {id} = req.params;//@TODO tutaj źle, trzeba zrobić metodę do GuesrRecord po Name i lastName, które są i tak widoczne
+    .patch('/my-choice', async (req, res)=>{
+        const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
 
-        const clickedTask = new GuestRecord(await GuestRecord.getOne(id));
-        await clickedTask.setAbsentPresent(); //@TODO tutaj dodać validację czasu rezygnacji
+        const clickedTask = new GuestRecord(await GuestRecord.getOne(idFromCookie));
+        await clickedTask.setAbsentPresent();//@TODO tutaj dodać validację czasu rezygnacji
 
-        res.redirect('/');
+        res.redirect('/my-choice');
     })
     .delete('/:id', async (req, res)=>{
-        const {id} = req.params; //@TODO tutaj źle, trzeba zrobić metodę do GuesrRecord po Name i lastName, które są i tak widoczne
+        const {id} = req.params; //W zadaniu nie ma potrzeby walidacji, dlatego jej nie ma, ale by się prosiło
         const clickedTask = new GuestRecord(await GuestRecord.getOne(id));
-        message = await clickedTask.delete(); //@TODO tutaj dodać validację czasu rezygnacji
+        await clickedTask.delete();
 
         res
-            .clearCookie(cookieName)//@TODO sprawdzić, czy działa
+            .clearCookie(cookieName)
             .redirect('/');
-        return;
     })

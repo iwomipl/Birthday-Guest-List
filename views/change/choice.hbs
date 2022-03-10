@@ -1,0 +1,34 @@
+<hr>
+<h1>{{loggedUser.name}} {{loggedUser.lastName}}</h1>
+<h1>Planujesz się pojawić?</h1>
+<div class="wrapper">
+    <div class="grid-container">
+            {{#if (isAbsent visitingGuest.willCome)}}
+            <div class="divs">
+            {{else}}
+            <div class="divs absent">
+            {{/if}}
+            <div class="p-in-div"><p><strong>{{visitingGuest.name}}</strong> <strong>{{visitingGuest.lastName}}</strong></p></div><div class="right-span"><p>
+            {{#if (isAbsent visitingGuest.willCome)}}
+                Obecność potwierdzona
+            {{else}}
+                {{#if (isResignedAt visitingGuest.resignedAt)}}
+                    Czas zgłoszenia nieobecności <strong>{{showTime visitingGuest.resignedAt}}</strong>
+                {{/if}}
+            {{/if}}</p></div>
+                {{#if (isAbsent visitingGuest.willCome)}}
+                    <form method="POST" action="/my-choice?_method=PATCH" >
+                        <button type="submit" name="isPresent" value="absent">Nie będę</button>
+                    </form>
+                {{else}}
+                    <form method="POST" action="/my-choice?_method=PATCH" >
+                        <button type="submit" name="isPresent" value="present">Będę</button>
+                    </form>
+                {{/if}}
+                <form method="POST" action="/{{visitingGuest.id}}?_method=DELETE" >
+                    <button type="submit" name="deleteOpened" value="{{visitingGuest.id}}">Usuń</button>
+                </form>
+        </div>
+    </div>
+    </div>
+</div>

@@ -53,20 +53,28 @@ export class GuestRecord {
         await pool.execute('DELETE FROM `guests` WHERE `id` = :id', {
             id: this.id,
         });
-        return `Gość ${this.name} ${this.lastName} został usunięty z listy gości.`;
+        return;
     }
 
     async setAbsentPresent(): Promise<void> {
-        const {willCome} = await GuestRecord.getOne(this.id);
+        const {willCome} = await GuestRecord.getOne(this.id); //@TODO dodać walidację czasu zmiany
 
-        await pool.execute('UPDATE `guests` SET `willCome` = :willCome WHERE `id` = :id', {
+        await pool.execute('UPDATE `guests` SET `willCome` = :willCome, `resignedAt` = :resignedAt WHERE `id` = :id', {
             willCome: willCome ? 0 : 1,
+            resignedAt: willCome ? new Date() : null,
             id: this.id,
         })
     }
 
-    async findByNameAndLastName(): Promise<void>{
+    static async findByNameAndLastName(sentName: string, sentLastName: string): Promise<string | null>{
+        const results = await GuestRecord.listAll();
+        const trimmedNames = sentName.trim()+sentLastName.trim();
 
+        const [guestFoundByName] = results.filter((obj) => {
+            return (obj.name.trim()+obj.lastName.trim() === trimmedNames);
+        });
+
+        return Boolean(guestFoundByName) ? guestFoundByName.id : null;
     }
 
     static async getOne(id: string): Promise<GuestRecord | null>{
@@ -77,9 +85,23 @@ export class GuestRecord {
        return results.length === 0 ? null : results[0];
     }
 
-    static async listAll(): Promise<GuestRecord[]>{
+    static async listAll(): Promise<GuestRecord[] | null>{
         const [results] = await pool.execute('SELECT * FROM `guests` ORDER BY `startTime` DESC') as GuestRecordResults;
 
+        return results.map(obj => new GuestRecord(obj));
+    }
+
+    static async listAllAbsent(): Promise<GuestRecord[] | null>{
+        const [results] = await pool.execute('SELECT * FROM `guests` WHERE `willCome`= 0 ORDER BY `startTime` DESC') as GuestRecordResults;
+        return results.map(obj => new GuestRecord(obj));
+    }
+
+    static async listAllPresent(): Promise<GuestRecord[] | null>{
+        const [results] = await pool.execute('SELECT * FROM `guests` WHERE `willCome`= 1 ORDER BY `startTime` DESC') as GuestRecordResults;
+        return results.map(obj => new GuestRecord(obj));
+    }
+    static async listAllThatResigned(): Promise<GuestRecord[] | null>{
+        const [results] = await pool.execute('SELECT * FROM `guests` WHERE `resignedAt` IS NOT NULL AND `willCome`= 0 ORDER BY `startTime` DESC') as GuestRecordResults;
         return results.map(obj => new GuestRecord(obj));
     }
 
