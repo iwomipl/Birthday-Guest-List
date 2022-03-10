@@ -41,20 +41,19 @@ export class GuestRecord {
         return this.id;
     }
 
-    async delete(): Promise<string>{
+    async delete(): Promise<void>{
         if (!this.id) {
             throw new ValidationError('Niestety nie udało się usunąć gościa.');
         }
         await pool.execute('DELETE FROM `guests` WHERE `id` = :id', {
             id: this.id,
         });
-        return;
     }
 
     async setAbsentPresent(): Promise<void> {
-        const {willCome} = await GuestRecord.getOne(this.id); //@TODO dodać walidację czasu zmiany
-        console.log(validateTimeOfResigning());
-        if (validateTimeOfResigning()){
+        const {willCome} = await GuestRecord.getOne(this.id);
+
+        if (await validateTimeOfResigning()){
             await pool.execute('UPDATE `guests` SET `willCome` = :willCome, `resignedAt` = :resignedAt WHERE `id` = :id', {
                 willCome: willCome ? 0 : 1,
                 resignedAt: willCome ? new Date() : null,
@@ -99,6 +98,7 @@ export class GuestRecord {
         const [results] = await pool.execute('SELECT * FROM `guests` WHERE `willCome`= 1 ORDER BY `startTime` DESC') as GuestRecordResults;
         return results.map(obj => new GuestRecord(obj));
     }
+
     static async listAllThatResigned(): Promise<GuestRecord[] | null>{
         const [results] = await pool.execute('SELECT * FROM `guests` WHERE `resignedAt` IS NOT NULL AND `willCome`= 0 ORDER BY `startTime` DESC') as GuestRecordResults;
         return results.map(obj => new GuestRecord(obj));

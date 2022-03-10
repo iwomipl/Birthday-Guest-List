@@ -11,43 +11,23 @@ homeRouter
     .get('/add-guest', async (req, res)=>{
         res.render('add/guest');
     })
-    .get('/download-guest-list', async (req, res)=>{
-        const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
-        if (idFromCookie) {
-            const path = await createFileWithBirthdayData(idFromCookie);
-
-            res
-                .download(path, async (err) => {
-                if (err){
-                 console.error(err);
-                 await unlink(path);
-                } else {
-                 await unlink(path);
-                }
-            })
-        } else {
-            throw new ValidationError('Zaloguj się zanim spróbujesz pobrać listę gości');
-        }
-})
     .get('/my-choice', async (req, res)=>{
         const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
         if (!idFromCookie){
             throw new ValidationError('Niestety nie jesteś zalogowany jako gośc. Dodaj siebie klikając przycisk "Dodaj Gościa" w menu górnym.');
         }
-        const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
+        const { loggedUser, resignationTimeStampString } = await getDataToRenderList(req.cookies.guestOnBirthday);
         const visitingGuest = await GuestRecord.getOne(idFromCookie);
 
         res.render('change/choice', {
             visitingGuest,
             loggedUser,
+            resignationTimeStampString,
         });
     })
     .get('/', async (req, res)=>{
         const fullList = await GuestRecord.listAll();
         const { loggedUser, resignationTimeStampString } = await getDataToRenderList(req.cookies.guestOnBirthday);
-        // const idFromCookie: string | null = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
-        // const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
-        // const resignationTimeStampString = await dateToString(dateOfBirthday);
 
         if (fullList.length === 0){
             res.redirect('/add-guest');
@@ -103,6 +83,24 @@ homeRouter
             resignationTimeStampString,
         });
     })
+    .get('/download-guest-list', async (req, res)=>{
+        const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
+        if (idFromCookie) {
+            const path = await createFileWithBirthdayData(idFromCookie);
+
+            res
+                .download(path, async (err) => {
+                    if (err){
+                        console.error(err);
+                        await unlink(path);
+                    } else {
+                        await unlink(path);
+                    }
+                })
+        } else {
+            throw new ValidationError('Zaloguj się zanim spróbujesz pobrać listę gości');
+        }
+    })
     .post('/', async (req, res)=>{
         const name: string = req.body.name;
         const lastName: string = req.body.lastName;
@@ -145,7 +143,7 @@ homeRouter
         const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
 
         const clickedTask = new GuestRecord(await GuestRecord.getOne(idFromCookie));
-        await clickedTask.setAbsentPresent();//@TODO tutaj dodać validację czasu rezygnacji
+        await clickedTask.setAbsentPresent();
 
         res.redirect('/my-choice');
     })

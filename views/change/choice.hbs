@@ -13,7 +13,7 @@
                 Obecność potwierdzona
             {{else}}
                 {{#if (isResignedAt visitingGuest.resignedAt)}}
-                    Czas zgłoszenia nieobecności <strong>{{showTime visitingGuest.resignedAt}}</strong>
+                    Czas zgłoszenia nieobecności </br><strong>{{resignationTimeStampString}}</strong>
                 {{/if}}
             {{/if}}</p></div>
                 {{#if (isAbsent visitingGuest.willCome)}}
