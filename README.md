@@ -8,11 +8,9 @@ By odpalić aplikację należy:
 Alternatywnie zamieściłem aplikację na Replit.it pod tym linkiem:
 https://replit.com/@iwomipl/Birthday-Guest-List
 Działają tam wszystkie jej funkcje (podłączyłem aplikację do zewnętrznej bazy danych) poza funkcją pobierania listy gości. Być może jest to związane z brakiem możliwości zapisywania plików przez sam serwer.
-By uruchomić aplikację na repl.it wystarczy kliknąć w zielony przycisk z napisem "Run", poczekać chwilę (czasem dłuższą) 
-i po uruchomieniu kliknąć w napis "Open website". Ostatni krok nie jest konieczny, 
-ale znacznie wygodniej używa się aplkikacji w pełnym oknie. W Repl.it tez można przeglądać pliki, 
-jednak mogą trochę różnic się od tych gitowych, 
-ponieważ musiałem dokonać kilku zmian ze względu na inne środowisko uruchomienia.
+By uruchomić aplikację na repl.it wystarczy kliknąć w zielony przycisk z napisem "Run", poczekać chwilę (czasem dłuższą) i po uruchomieniu kliknąć w napis "Open website". Ostatni krok nie jest konieczny, ale znacznie wygodniej używa się aplkikacji w pełnym oknie. W Repl.it tez można przeglądać pliki, jednak mogą trochę różnic się od tych gitowych, ponieważ musiałem dokonać kilku zmian ze względu na inne środowisko uruchomienia.
+
+Podsumowując Code Review tylko na plikach z Gita, a obejrzenie działania strony najszybsze może być na repl.it 
 
 Aplikacja pozwala na:
 - stworzenie listy gości. (imię, nazwisko) - menu "Wszyscy"
@@ -51,6 +49,5 @@ DECYZJE PROJEKTOWE:
 - Staralem się w projekcie jak najczęściej korzystać za bazy danych, jest szybsza w wyszukiwaniu informacji, a funkcje asynchroniczne pozwalają serwerowi zająć się następnym zadaniem w Call Stacku. Mógłbym więc np. funkcje pobierające listy użytkowników zagregować w jedną funkcję i później mapować, przez wyniki poszukując właściwych rozwiązań, jednak moja intencja była taka, by używać Bazy Danych do filtrowania.   
 - Po wysłaniu wygenerowanego pliku z listą gości, kasuję go z folderu.
 - Tworząc zapytania do bazy danych używałem składni utrudniającej wstrzyknięcie kodu do bazy danych za pomocą zmiennych przekazywanych w obiekcie opcji.
-
 
 
