@@ -30,7 +30,7 @@ pobranie pliku z informacjami przez uczestnika imprezy, które powinno zawierać
 
 Dodatkowo zrobiłem możliwość usunięcia aktualnego użytkownika w ustawieniach.
 Kliknięcie "Dodaj gościa" umożliwia dodanie osoby do listy lub w przypadku użycia istniejących już danych,
-zalogowanie jako wskazany gość. Role w zadaniu nie miały mieć znaczenia, 
+zalogowanie jako wskazany gość. 
 dlatego też stworzyłem tak prostą metodę przejmowania tożsamości.
 Większość błędów opisuje co należy zrobić, by przejść właściwą walidację. 
 Np. nie wejdziemy w "Ustawienia" ani nie pobierzemy listy gości bez zalogowania jako jeden z gości urodzin.
@@ -45,6 +45,7 @@ DECYZJE PROJEKTOWE:
 - ExpressHandleBars z ućzyciem helperów - niby wygląd nie ma wielkiego znaczenia, ale handlebarsy bardzo to ułatwiają.
 - Funkcje asynchroniczne - starałem się unikać zajmowania Call Stacka, funkcje, które mogłem zrobić asynchroniczne takie są.
 - Wzorzec projektowy Active Record.
+- Nie wiem, czy dobrze zrozumiałem treść zadania i stwierdzenie, "Role w zadaniu nie mają znaczenia i nie ma potrzeby weryfikowania ich podczas wykonywania poszczególnych operacji." zamiast logowania na hasło wprowadziłem system, który sprawdza, czy wpisane Imię oraz nazwisko znajduje się już wśród gości i w takim przypadku gośc "przejmuje" tożsamość wpisanego gościa. W innym przypadku zakłada nowego gościa. Umożliwia to szybkie i wygodne poruszanie się po aplikacji i sprawdzenie jej funkcjonalności przez sprawdzającego. 
 - Zmienną dateOfBirthday umieściłem w (ponoć) formacie ułatwiającym jego obsługę przez baz danych "YYYY-MM-DD HH:MM:SS".
 - Staralem się w projekcie jak najczęściej korzystać za bazy danych, jest szybsza w wyszukiwaniu informacji, a funkcje asynchroniczne pozwalają serwerowi zająć się następnym zadaniem w Call Stacku. Mógłbym więc np. funkcje pobierające listy użytkowników zagregować w jedną funkcję i później mapować, przez wyniki poszukując właściwych rozwiązań, jednak moja intencja była taka, by używać Bazy Danych do filtrowania.   
 - Po wysłaniu wygenerowanego pliku z listą gości, kasuję go z folderu.

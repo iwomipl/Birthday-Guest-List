@@ -29,7 +29,7 @@ export class GuestRecord {
         this.resignedAt = resignedAt;
         this.willCome = willCome;
     }
-    //dodanie nowego rekordu
+    //add new guest to database
     async insert(): Promise<string>{
        await pool.execute("INSERT INTO `guests`(`id`, `name`, `lastName`,`startTime`, `willCome`) VALUES (:id, :name, :lastName, :startTime, :willCome)", {
            id: this.id,
@@ -41,7 +41,7 @@ export class GuestRecord {
         return this.id;
     }
 
-    // Usunięcie rekordu z bazy danych
+    //delete guest from database
     async delete(): Promise<void>{
         if (!this.id) {
             throw new ValidationError('Niestety nie udało się usunąć gościa.');
@@ -51,16 +51,16 @@ export class GuestRecord {
         });
     }
 
-    //ustawienie obecności gościa
+    //toggling between states absent present
     async setAbsentPresent(): Promise<void> {
         const {willCome} = await GuestRecord.getOne(this.id);
 
-        //sprawdzenie czy, akcja odbywa się 5 godzin przed czasem urodzin
+        //check if time of action fits to time limit
         if (await validateTimeOfResigning()){
             await pool.execute('UPDATE `guests` SET `willCome` = :willCome, `resignedAt` = :resignedAt WHERE `id` = :id', {
-                //zmiana statusu odwiedzin
+                //toggle status
                 willCome: willCome ? 0 : 1,
-                //ewentualne zapisanie daty zmiany odwiedzin
+                //toggle between timestamp of action and null
                 resignedAt: willCome ? new Date() : null,
                 id: this.id,
             })
@@ -69,7 +69,7 @@ export class GuestRecord {
         }
     }
 
-    //wyszukanie gościa po imieniu i nazwisku
+    //search by name and last name, simple validation that enables to log as a existing user
     static async findByNameAndLastName(sentName: string, sentLastName: string): Promise<string | null>{
         const results = await GuestRecord.listAll();
         const trimmedNames = sentName.trim()+sentLastName.trim();
@@ -81,41 +81,41 @@ export class GuestRecord {
         return Boolean(guestFoundByName) ? guestFoundByName.id : null;
     }
 
-    //Pobranie jednego rekordu
+    //gets exsisting record from db using id from above function
     static async getOne(id: string): Promise<GuestRecord | null>{
        const [results] = await pool.execute('SELECT * FROM `guests` WHERE `id`=:id',{
             id,
         }) as GuestRecordResults;
-
+    //if record exists returns result, if not returns null
        return results.length === 0 ? null : results[0];
     }
 
-    //Pobranie wszystkich rekordów
+    //Get list of all records of guests
     static async listAll(): Promise<GuestRecord[] | null>{
         const [results] = await pool.execute('SELECT * FROM `guests` ORDER BY `startTime` DESC') as GuestRecordResults;
 
         return results.map(obj => new GuestRecord(obj));
     }
 
-    //Pobranie listy rekordów osób, które nie będą obecne
+    //Get list of all records of guests that will be absent
     static async listAllAbsent(): Promise<GuestRecord[] | null>{
         const [results] = await pool.execute('SELECT * FROM `guests` WHERE `willCome`= 0 ORDER BY `startTime` DESC') as GuestRecordResults;
         return results.map(obj => new GuestRecord(obj));
     }
 
-    //Pobranie listy rekordów wszystkich obecnych
+    //Get list of all records of guests that will be present
     static async listAllPresent(): Promise<GuestRecord[] | null>{
         const [results] = await pool.execute('SELECT * FROM `guests` WHERE `willCome`= 1 ORDER BY `startTime` DESC') as GuestRecordResults;
         return results.map(obj => new GuestRecord(obj));
     }
 
-    //Pobranie listy rekordów wszystkich, którzy mieli być obecni, ale zrezygnowali
+    //Get list of all records of guests that confirmed, but later resigned
     static async listAllThatResigned(): Promise<GuestRecord[] | null>{
         const [results] = await pool.execute('SELECT * FROM `guests` WHERE `resignedAt` IS NOT NULL AND `willCome`= 0 ORDER BY `startTime` DESC') as GuestRecordResults;
         return results.map(obj => new GuestRecord(obj));
     }
 
-    //Sprawdzenie, czy dane logowania znajdują się w bazie
+    //Check if guest with given credentials exist in DB
     static async isNameTaken(sentName: string, sentLastName: string): Promise<boolean>{
         const results = await GuestRecord.listAll();
         const trimmedNames = sentName.trim()+sentLastName.trim();

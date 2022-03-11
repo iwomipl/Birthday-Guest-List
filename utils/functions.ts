@@ -3,23 +3,23 @@ import {writeFile, appendFile} from "fs/promises";
 import {dateOfBirthday, locationOfBirthday, timeBeforeBirthdayToResignInMiliseconds} from "./variables";
 import {GuestRecord} from "../records/guest.record";
 
-//sprawdzenie czy akcja odbywa się 5 godzin przed planowymi urodzinami
+//validate if action is happening in right time (not 5 hours before birthday)
 export async function validateTimeOfResigning(): Promise<boolean>{
     return ((dateOfBirthday.getTime() - new Date().getTime()) >= timeBeforeBirthdayToResignInMiliseconds);
 }
 
-//bezpieczne stworzenie ścieżki do katalogu, utrudniające wyjście z katalogu głównego projektu
+//creation of safe patho to file, this function unables getting out of project folder
 export async function safeJoin(base: string, target: string): Promise<string> {
     const targetPath = `.${normalize(`/${target}`)}`;
     return resolve(base, targetPath);
 }
 
-//funkcja wycinająca źle wyglądające informacje z obiektu Date tworząca stringa gotowego do pokazania na stronie
+//function cutting of some part of string from Object Date, afterward it sends string
 export async function dateToString(sentDate: Date): Promise<string>{
     return `${new Date(sentDate).toISOString().slice(0, 10)}  ${new Date(sentDate).toISOString().slice(11, 19)}`;
 }
 
-//Funkcja tworząca plik, który wysłany zostanie do Gościa, funkcja zwraca ścieżkę do pliku
+//Creates HTML file, that is sent to Guest. Function returns path to the newly created file
 export async function createFileWithBirthdayData(id: string): Promise<string>{
     const pathToFile = await safeJoin(dirname(__dirname), `/public/files/${id}.html`);
     const guest =  await GuestRecord.getOne(id);
@@ -36,7 +36,7 @@ export async function createFileWithBirthdayData(id: string): Promise<string>{
     return pathToFile;
 }
 
-//funkcja tworząca część pliku HTML wysyłanego do użytkownika
+//Creating top parto of HTML file
 async function createHeader(location: string, time: string): Promise<string>{
     return (`
 <p>Zapraszam na moją imprezę urodzinową.</p>
@@ -45,12 +45,12 @@ async function createHeader(location: string, time: string): Promise<string>{
 `);
 }
 
-//Funkcja generująca kolejną część pliku
+//creating next part of file from Guest object
 async function createHeadOfBody(obj: GuestRecord): Promise<string>{
     return `<p>Potwierdzenie przygotowano dla <strong>${obj.name} ${obj.lastName}</strong></p>`;
 }
 
-//funkcja iterująca przez pobraną tabelę gości i tworząca główne ciało wysyłanego pliku
+//creating body of HTML file by iterating thru sent list of records of Guests
 async function createTableOfGuests(listOfGuests: GuestRecord[]){
     if (listOfGuests.length === 0) {
         return `<h1>Bardzo mi przykro, nikt nie przyjdzie.</h1>`
@@ -77,7 +77,7 @@ async function createTableOfGuests(listOfGuests: GuestRecord[]){
     return tableHeader+tableContent.join('')+tableFinish;
 }
 
-//Wielokrotnie powtarzająca się przed renderowaniem czynność została przesłana do tej funkcji
+//Function used multiple times before rendering pages. Creating it makes homeRouter code easier to read
 export async function getDataToRenderList(id: string, sentMessage?: string){
     const idFromCookie: string | null = id ? id : null;
     const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;

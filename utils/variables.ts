@@ -1,8 +1,8 @@
-//nazwa ciasteczka zapisanego przy "logowaniu"
+//name of cookie used in logging
 export const cookieName = `guestOnBirthday`;
-//Data urodzin, koniecznie zapisać w formacie "YYYY-MM-DD HH:MM:SS"
+//Day of Birthday, best working in this format: "YYYY-MM-DD HH:MM:SS"
 export const dateOfBirthday = new Date('2022-03-11 18:47:00');
-//Miejsce imprezy urodzinowej
+//location of birthday party
 export const locationOfBirthday = 'Why not London Eye'
-//Wyliczenie 5 godzin w milisekundach
+//five hours in miliseconds
 export const timeBeforeBirthdayToResignInMiliseconds = (60 * 60 * 5)*1000;

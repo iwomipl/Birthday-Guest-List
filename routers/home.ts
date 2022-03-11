@@ -8,11 +8,11 @@ import {unlink} from "fs/promises";
 export const homeRouter = Router();
 
 homeRouter
-    //renderowanie formularza dodania gościa/ zalogowania
+    //render form add/log guest
     .get('/add-guest', async (req, res)=>{
         res.render('add/guest');
     })
-    //metoda GET i renderowanie strony przed i po zmianie w metodzie PATCH kończącą sie redirectem
+    //method GET and rendering site before and after changing status (willCome variable) in method Patch that responds with redirect to this page
     .get('/my-choice', async (req, res)=>{
         const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
         if (!idFromCookie){
@@ -27,25 +27,25 @@ homeRouter
             resignationTimeStampString,
         });
     })
-    //Renderowanie strony głównej
+    //render "Wszyscy" menu option
     .get('/', async (req, res)=>{
         const fullList = await GuestRecord.listAll();
-        //jeśli lista gości jest pusta, przekierowanie do dodania gościa
+        //if list is empty redirect to add user page
         if (fullList.length === 0){
             res.redirect('/add-guest');
             return;
         }
-        //Pobieranie danych do renderowania
+        //Get data to render the Page
         const { loggedUser, resignationTimeStampString } = await getDataToRenderList(req.cookies.guestOnBirthday);
 
-        //w innym przypadku renderujemy listę
+        //if the list is not empty render list
         res.render('home/home', {
             fullList,
             loggedUser,
             resignationTimeStampString,
         });
     })
-    //Renderowanie listy nieobecnych
+    //render "Nieobecni" page
     .get('/absent', async (req, res)=>{
         const fullList = await GuestRecord.listAllAbsent();
         if (fullList.length === 0){
@@ -61,7 +61,7 @@ homeRouter
             resignationTimeStampString,
         });
     })
-    //Renderowanie listy obecnych
+    //Render "Obecni" Page
     .get('/present', async (req, res)=>{
         const fullList = await GuestRecord.listAllPresent();
         if (fullList.length === 0){
@@ -75,7 +75,7 @@ homeRouter
             message,
         });
     })
-    //Renderowanie listy osób, które zrezygnowały
+    //Render "Zrezygnowali" page
     .get('/resigned', async (req, res)=>{
         const fullList = await GuestRecord.listAllThatResigned();
         if (fullList.length === 0){
@@ -91,7 +91,7 @@ homeRouter
             resignationTimeStampString,
         });
     })
-    //Pobranie wygenerowanego pliku
+    //Create and download html file with guest list
     .get('/download-guest-list', async (req, res)=>{
         const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
         if (idFromCookie) {
@@ -111,14 +111,14 @@ homeRouter
             throw new ValidationError('Zaloguj się zanim spróbujesz pobrać listę gości');
         }
     })
-    //Utworzenie/zalogowanie gościa
+    //Method POST add/log user in "Dodaj gościa" page
     .post('/', async (req, res)=>{
         const name: string = req.body.name;
         const lastName: string = req.body.lastName;
-        //odnalezienie gościa po imieniu
+        //Find record of guest by name and lastName
         const foundByName = await GuestRecord.findByNameAndLastName(name, lastName) ?? null;
 
-        //Jeśli gość istnieje logujemy jego
+        //If guest record is not empty log guest
         if (foundByName) {
             const {id} = await GuestRecord.getOne(foundByName);
 
@@ -134,7 +134,7 @@ homeRouter
                 throw new ValidationError('Coś poszło nie tak, spróbuj ponownie.')
             }
         } else {
-            //jeśli gość o powyższych danych nie istnieje, dodajemy nowego do Bazy Danych
+            //if guest record doesn't exist store new record
             const newGuest = new GuestRecord({
                 name: name,
                 lastName: lastName,
@@ -152,16 +152,16 @@ homeRouter
                 .redirect('/');
         }
     })
-    //Zmiana statusu zalogowanego użytkownika
+    //change status (willCome variable) of absention of logged user
     .patch('/my-choice', async (req, res)=>{
         const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
         const clickedTask = new GuestRecord(await GuestRecord.getOne(idFromCookie));
-        //ta funkcja zmienia status użytkownika
+        //this is where status (willCome variable) is changed
         await clickedTask.setAbsentPresent();
 
         res.redirect('/my-choice');
     })
-    //Usuwanie użytkownika
+    //Deletion of Guest Record
     .delete('/:id', async (req, res)=>{
         const {id} = req.params; //W zadaniu nie ma potrzeby walidacji, dlatego jej nie ma, ale by się prosiło
         const clickedTask = new GuestRecord(await GuestRecord.getOne(id));
