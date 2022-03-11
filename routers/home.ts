@@ -18,13 +18,12 @@ homeRouter
         if (!idFromCookie){
             throw new ValidationError('Niestety nie jesteś zalogowany jako gośc. Dodaj siebie klikając przycisk "Dodaj Gościa" w menu górnym.');
         }
-        const { loggedUser, resignationTimeStampString } = await getDataToRenderList(req.cookies.guestOnBirthday);
+        const { loggedUser} = await getDataToRenderList(req.cookies.guestOnBirthday);
         const visitingGuest = await GuestRecord.getOne(idFromCookie);
-
+        console.log(visitingGuest)
         res.render('change/choice', {
             visitingGuest,
             loggedUser,
-            resignationTimeStampString,
         });
     })
     //render "Wszyscy" menu option
@@ -36,13 +35,12 @@ homeRouter
             return;
         }
         //Get data to render the Page
-        const { loggedUser, resignationTimeStampString } = await getDataToRenderList(req.cookies.guestOnBirthday);
+        const { loggedUser} = await getDataToRenderList(req.cookies.guestOnBirthday);
 
         //if the list is not empty render list
         res.render('home/home', {
             fullList,
             loggedUser,
-            resignationTimeStampString,
         });
     })
     //render "Nieobecni" page
@@ -51,14 +49,13 @@ homeRouter
         if (fullList.length === 0){
             throw new ValidationError('Niestety, nikogo nie ma na liście gości nieobecnych');
         }
-        const { loggedUser, resignationTimeStampString, message } = await getDataToRenderList(req.cookies.guestOnBirthday, ', którzy nie przyjdą.');
+        const { loggedUser, message } = await getDataToRenderList(req.cookies.guestOnBirthday, ', którzy nie przyjdą.');
 
 
         res.render('home/home', {
             fullList,
             message,
             loggedUser,
-            resignationTimeStampString,
         });
     })
     //Render "Obecni" Page
@@ -81,14 +78,13 @@ homeRouter
         if (fullList.length === 0){
             throw new ValidationError('Niestety, nikogo nie ma na liście, gości, którzy zrezygnowali.');
         }
-        const { loggedUser, message, resignationTimeStampString } = await getDataToRenderList(req.cookies.guestOnBirthday, ', którzy zrezygnowali.');
+        const { loggedUser, message} = await getDataToRenderList(req.cookies.guestOnBirthday, ', którzy zrezygnowali.');
 
 
         res.render('home/home', {
             fullList,
             loggedUser,
             message,
-            resignationTimeStampString,
         });
     })
     //Create and download html file with guest list

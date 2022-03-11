@@ -15,7 +15,7 @@ export async function safeJoin(base: string, target: string): Promise<string> {
 }
 
 //function cutting of some part of string from Object Date, afterward it sends string
-export async function dateToString(sentDate: Date): Promise<string>{
+export function dateToString(sentDate: Date): string{
     return `${new Date(sentDate).toISOString().slice(0, 10)}  ${new Date(sentDate).toISOString().slice(11, 19)}`;
 }
 
@@ -25,7 +25,7 @@ export async function createFileWithBirthdayData(id: string): Promise<string>{
     const guest =  await GuestRecord.getOne(id);
     const guestList = await GuestRecord.listAllPresent();
     const str = await createHeadOfBody(guest);
-    const header = await createHeader(locationOfBirthday, await dateToString(dateOfBirthday));
+    const header = await createHeader(locationOfBirthday, dateToString(dateOfBirthday));
     const listOfGuests = await createTableOfGuests(guestList);
 
     await writeFile(pathToFile, header, 'utf8');
@@ -81,12 +81,10 @@ async function createTableOfGuests(listOfGuests: GuestRecord[]){
 export async function getDataToRenderList(id: string, sentMessage?: string){
     const idFromCookie: string | null = id ? id : null;
     const loggedUser = await GuestRecord.getOne(idFromCookie) ?? null;
-    const resignationTimeStampString = await dateToString(dateOfBirthday);
     const message = sentMessage;
 
     return {
         loggedUser,
-        resignationTimeStampString,
         message,
     }
 }
