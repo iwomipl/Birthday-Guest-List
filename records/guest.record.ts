@@ -35,7 +35,7 @@ export class GuestRecord {
            id: this.id,
            name: this.name,
            lastName: this.lastName,
-           startTime: new Date(),
+           startTime: new Date(new Date().toLocaleString()),
            willCome: this.willCome,
        });
         return this.id;
@@ -61,7 +61,7 @@ export class GuestRecord {
                 //toggle status
                 willCome: willCome ? 0 : 1,
                 //toggle between timestamp of action and null
-                resignedAt: willCome ? new Date() : null,
+                resignedAt: willCome ? new Date(new Date().toLocaleString()) : null,
                 id: this.id,
             })
         } else {

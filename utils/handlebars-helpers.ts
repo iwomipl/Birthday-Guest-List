@@ -3,5 +3,5 @@ export const handlebarsHelpers = {
     ilLogged: (id: string) => !!id,
     isMessage: (message: string) => !!message,
     isResignedAt: (resignedAt: string) => !!resignedAt,
-    cutResignationTime: (date: Date) => `${new Date(date).toISOString().slice(0, 10)}  ${new Date(date).toISOString().slice(11, 19)}`,
+    cutResignationTime: (date: Date) => `${new Date(date).toLocaleDateString('fr-CA', { year: 'numeric', month: '2-digit', day: '2-digit' })}  ${new Date(date).toLocaleTimeString()}`,
 }

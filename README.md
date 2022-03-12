@@ -19,6 +19,7 @@ Aplikacja pozwala na:
 - odwołanie swojej obecności, ale nie później niż na 5 godzin przed rozpoczęciem imprezy. Osoba, która
   odwołała swoją obecność może ponownie się zgłosić, ale również musi zrobić to na max. 5 godzin przed
   rozpoczęciem, - menu "Ustawienia" przycisk "Będę"/"Nie będę" zależnie od wybranej opcji
+- w utils/variables.ts można zmienić/pobawić się nazwą ciastka, datami, godzinami przed imprezą uniemożliwiającymi zmiany, czy lokalizacją urodzin.
 wyświetlenie osób które:
 - przyjdą na Twoją imprezę,- menu "Obecni"
 - nie będą uczestniczyć w imprezie, - menu "Nieobecni"
@@ -50,5 +51,8 @@ DECYZJE PROJEKTOWE:
 - Staralem się w projekcie jak najczęściej korzystać za bazy danych, jest szybsza w wyszukiwaniu informacji, a funkcje asynchroniczne pozwalają serwerowi zająć się następnym zadaniem w Call Stacku. Mógłbym więc np. funkcje pobierające listy użytkowników zagregować w jedną funkcję i później mapować, przez wyniki poszukując właściwych rozwiązań, jednak moja intencja była taka, by używać Bazy Danych do filtrowania.   
 - Po wysłaniu wygenerowanego pliku z listą gości, kasuję go z folderu.
 - Tworząc zapytania do bazy danych używałem składni utrudniającej wstrzyknięcie kodu do bazy danych za pomocą zmiennych przekazywanych w obiekcie opcji.
+- Na koniec zostało mi trochę czasu i refaktoryzowałem kod, jednak wygenerowało mi to kilka bugów, które utworzyły się w procesie.
+
+
 
 

@@ -16,7 +16,7 @@ export async function safeJoin(base: string, target: string): Promise<string> {
 
 //function cutting of some part of string from Object Date, afterward it sends string
 export function dateToString(sentDate: Date): string{
-    return `${new Date(sentDate).toISOString().slice(0, 10)}  ${new Date(sentDate).toISOString().slice(11, 19)}`;
+    return `${new Date(sentDate).toLocaleDateString('fr-CA', { year: 'numeric', month: '2-digit', day: '2-digit' })}  ${new Date(sentDate).toLocaleTimeString()}`;
 }
 
 //Creates HTML file, that is sent to Guest. Function returns path to the newly created file

@@ -16,11 +16,11 @@ homeRouter
     .get('/my-choice', async (req, res)=>{
         const idFromCookie = req.cookies.guestOnBirthday ? req.cookies.guestOnBirthday : null;
         if (!idFromCookie){
-            throw new ValidationError('Niestety nie jesteś zalogowany jako gośc. Dodaj siebie klikając przycisk "Dodaj Gościa" w menu górnym.');
+            throw new ValidationError('Niestety nie jesteś zalogowany jako gość. Dodaj siebie klikając przycisk "Dodaj Gościa" w menu górnym.');
         }
         const { loggedUser} = await getDataToRenderList(req.cookies.guestOnBirthday);
         const visitingGuest = await GuestRecord.getOne(idFromCookie);
-        console.log(visitingGuest)
+
         res.render('change/choice', {
             visitingGuest,
             loggedUser,
@@ -121,7 +121,7 @@ homeRouter
             if (id) {
                 res
                     .cookie(cookieName, id, {
-                        expires: dateOfBirthday,
+                        expires: (new Date(new Date().toLocaleString()) < dateOfBirthday) ? dateOfBirthday : new Date(Date.now() + 3 * (60 * 60 * 1000)),
                         httpOnly: true,
                         secure: true,
                     })
@@ -138,14 +138,17 @@ homeRouter
             });
 
             const id = await newGuest.insert();
-
-            res
-                .cookie(cookieName, id, {
-                    expires: dateOfBirthday,
-                    httpOnly: true,
-                    secure: true,
-                })
-                .redirect('/');
+            if (new Date(new Date().toLocaleString()) < dateOfBirthday) {
+                res
+                    .cookie(cookieName, id, {
+                        expires: dateOfBirthday,
+                        httpOnly: true,
+                        secure: true,
+                    })
+                    .redirect('/');
+            } else {
+                throw new ValidationError('Niestety za późno dołączasz do naszego grona. Czas dopisywania się do listy gości już minął.');
+            }
         }
     })
     //change status (willCome variable) of absention of logged user
